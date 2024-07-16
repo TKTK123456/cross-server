@@ -1,0 +1,23 @@
+"name": "cross-server",
+  "version": "1.0.0",
+  "description": "Cross server testing",
+  "main": "index.js",
+  "scripts": {
+    "test": "node ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TKTK123456/cross-server.git"
+  },
+  "author": "TKTK1234567",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/TKTK123456/cross-server/issues"
+  },
+  "homepage": "https://github.com/TKTK123456/cross-server#readme"
+}
+{
+  "dependencies": {
+    "discord.js": "^14.15.3"
+  },
+  "devDependencies": {},
