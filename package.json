@@ -1,7 +1,13 @@
-"name": "cross-server",
+{
+  "dependencies": {
+    "discord.js": "^14.15.3"
+  },
+  "name": "cross-server",
   "version": "1.0.0",
   "description": "Cross server testing",
   "main": "index.js",
+  "devDependencies": {},
+  "type": "module",
   "scripts": {
     "test": "node ."
   },
@@ -16,8 +22,3 @@
   },
   "homepage": "https://github.com/TKTK123456/cross-server#readme"
 }
-{
-  "dependencies": {
-    "discord.js": "^14.15.3"
-  },
-  "devDependencies": {},
