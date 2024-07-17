@@ -1,46 +1,32 @@
-import { Client, GatewayIntentBits, Collection, Events, Activity, SlashCommandBuilder, Webhook, ChannelType, PermissionFlagsBits} from 'discord.js';
+import { Client, GatewayIntentBits, Collection, Events, Activity, SlashCommandBuilder, Webhook, ChannelType, PermissionFlagsBits, WebhookClient} from 'discord.js';
 import fs from 'node:fs';
 import path from 'node:path';
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMembers] });
 const __dirname = path.resolve();
 console.log('Runing create webhooks worked!')
-let webhook;
+let webhook = new Collection();
+async function getWebhookFromGuild(guild) {
+  const webhooks = await guild.fetchWebhooks();
+  return webhooks
+}
 export default async function getWebhooks() {
   console.log('getting webhooks')
-  const webhooks = [];
-  for (const channels of client.c.cache) {
-    const channels = guilds.
-    console.log(channels)
-    for (const channel of channels.values()) {
-      const fetchedWebhooks = await channel.fetchWebhooks();
-      console.log(channel)
-      webhooks.push(...fetchedWebhooks);
-      console.log(fetchedWebhooks)
-    }
+  for (const guild of client.guilds.cache.values()) {
+      webhook.merge(await getWebhookFromGuild(guild))
   }
-  webhook = webhooks
-  console.log(webhooks)
-  return webhooks;
+  console.log(webhook)
 }
 client.on('ready', () => {
   getWebhooks()
 })
-
 async function sendMessage(message, author, avatar, channelId) {
-  const channel = client.channels.cache.get(channelId);
-  if (channel) {
-    console.log(`Sending message is working!`)
-    console.log(channelId)
-      console.log(`Sending message is working still!`)
-      const webhooks = webhook.find(webhook => webhook.channel === channel)
-      console.log(webhook.find(webhook => webhook.channel === channel))
+      const webhooks = await webhook.keys.find(wh => wh.channel_id === channelId)
       await webhooks.send({
         content: message,
         username: author,
         avatarURL: avatar,
       });
     }
-  }
 client.on('messageCreate', (message) => {
   if (message.webhookId) return
   if (message.author.bot) return
@@ -77,11 +63,7 @@ client.on('messageCreate', (message) => {
   if (message.author.bot) return
   const allChannels = fs.readFileSync(path.join(__dirname, 'webhooks/channels.txt'), 'utf-8').split('\n')
   if (!allChannels.includes(message.channel.id)) return
-  console.log(`Message from ${message.author.username}: ${message.content}`)
   for (const channel of allChannels) {
-    console.log(message.channel.id !== channel)
-    console.log(message.channel.id)
-    console.log(channel)
     if (channel === '') break
     if (!message.channel.id !== channel) {
       sendMessage(message.content, message.author.username, message.author.avatarURL(), channel)
