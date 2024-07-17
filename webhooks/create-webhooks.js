@@ -1,5 +1,8 @@
 import { Client, GatewayIntentBits, Collection, Events, Activity, SlashCommandBuilder, Webhook, ChannelType, PermissionFlagsBits} from 'discord.js';
+import fs from 'node:fs';
+import path from 'node:path';
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMembers] });
+const __dirname = path.resolve();
 console.log('Runing create webhooks worked!')
 let webhook;
 export default async function getWebhooks() {
@@ -23,16 +26,27 @@ client.on('messageCreate', (message) => {
   if (!message.member.permissions.has(PermissionFlagsBits.ManageChannels)) {
     message.reply(message.author + ' You dont have permission to use this command!')
   return 
-  } else if (message.content.toLowerCase.startsWith(`<@1259210787210268682> setup cross server channel `)) {
+  } else if (message.content.startsWith(`<@1259210787210268682> setup cross server channel`)) {
     const channel = message.mentions.channels.first()
     if (!channel) {
       message.reply('Please mention a channel!')
       return
     }
-    const webhooks = webhook.filter(webhook => webhook.channelId === channel.id)
-    if(webhook) {
-      message.reply('This channel already has a webhook!')
+    console.log(channel.name)
+    const allChannels = fs.readFile(path.join(__dirname, 'webhooks/channels.txt'), 'utf-8',).split('\n');
+    const channels = allChannels.find(channelList => channelList.includes(channel.id))
+    if (channels !== undefined) {
+      message.reply('This channel is already setup!')
+      return
     }
+    fs.appendFile(path.join(__dirname, 'webhooks/channels.txt'), channel.id + '\n' , (err) => {
+      if (err) {
+        console.log(err)
+      }
+    })
+    channel.createWebhook({
+      name: channel.id
+    })
   }
 });
 
