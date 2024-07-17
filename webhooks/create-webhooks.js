@@ -8,20 +8,42 @@ let webhook;
 export default async function getWebhooks() {
   console.log('getting webhooks')
   const webhooks = [];
-  for (const guilds of client.guilds.cache) {
-    const channels = guilds.filter(channel => channel.type === ChannelType.GuildText);
+  for (const channels of client.c.cache) {
+    const channels = guilds.
+    console.log(channels)
     for (const channel of channels.values()) {
       const fetchedWebhooks = await channel.fetchWebhooks();
+      console.log(channel)
       webhooks.push(...fetchedWebhooks);
+      console.log(fetchedWebhooks)
     }
   }
   webhook = webhooks
+  console.log(webhooks)
   return webhooks;
 }
 client.on('ready', () => {
   getWebhooks()
 })
+
+async function sendMessage(message, author, avatar, channelId) {
+  const channel = client.channels.cache.get(channelId);
+  if (channel) {
+    console.log(`Sending message is working!`)
+    console.log(channelId)
+      console.log(`Sending message is working still!`)
+      const webhooks = webhook.find(webhook => webhook.channel === channel)
+      console.log(webhook.find(webhook => webhook.channel === channel))
+      await webhooks.send({
+        content: message,
+        username: author,
+        avatarURL: avatar,
+      });
+    }
+  }
 client.on('messageCreate', (message) => {
+  if (message.webhookId) return
+  if (message.author.bot) return
   if (!message.content.startsWith('<@1259210787210268682>')) return
   if (!message.member.permissions.has(PermissionFlagsBits.ManageChannels)) {
     message.reply(message.author + ' You dont have permission to use this command!')
@@ -33,7 +55,7 @@ client.on('messageCreate', (message) => {
       return
     }
     console.log(channel.name)
-    const allChannels = fs.readFile(path.join(__dirname, 'webhooks/channels.txt'), 'utf-8',).split('\n');
+    const allChannels = fs.readFileSync(path.join(__dirname, 'webhooks/channels.txt'), 'utf-8').split('\n'); 
     const channels = allChannels.find(channelList => channelList.includes(channel.id))
     if (channels !== undefined) {
       message.reply('This channel is already setup!')
@@ -47,9 +69,25 @@ client.on('messageCreate', (message) => {
     channel.createWebhook({
       name: channel.id
     })
+    getWebhooks()
   }
 });
-
+client.on('messageCreate', (message) => {
+  if (message.webhookId) return
+  if (message.author.bot) return
+  const allChannels = fs.readFileSync(path.join(__dirname, 'webhooks/channels.txt'), 'utf-8').split('\n')
+  if (!allChannels.includes(message.channel.id)) return
+  console.log(`Message from ${message.author.username}: ${message.content}`)
+  for (const channel of allChannels) {
+    console.log(message.channel.id !== channel)
+    console.log(message.channel.id)
+    console.log(channel)
+    if (channel === '') break
+    if (!message.channel.id !== channel) {
+      sendMessage(message.content, message.author.username, message.author.avatarURL(), channel)
+    }
+  }
+})
 
 
 client.login(process.env.token);
